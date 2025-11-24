@@ -48,30 +48,28 @@ function LiveShowPage() {
   const desktopRef = useRef<HTMLDivElement>(null)
   const mobileRef = useRef<HTMLDivElement>(null)
 
-  // Initialize horizontal scroll with GSAP
+  // Initialize horizontal scroll with GSAP - snappier feel
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    // Calculate total scroll width
     const sections = gsap.utils.toArray<HTMLElement>('.panel')
     
-    // Create horizontal scroll animation
+    // More responsive scroll - scrub: 0.1 makes it very snappy and mouse-responsive
     const scrollTween = gsap.to(sections, {
       xPercent: -100 * (sections.length - 1),
       ease: 'none',
       scrollTrigger: {
         trigger: container,
         pin: true,
-        scrub: 1,
+        scrub: 0.1, // Changed from 1 to 0.1 for snappier response
         snap: {
           snapTo: 1 / (sections.length - 1),
-          duration: 0.5,
+          duration: { min: 0.2, max: 0.4 }, // Faster snap
           ease: 'power2.inOut',
         },
         end: () => `+=${container.offsetWidth * (sections.length - 1)}`,
         onUpdate: (self) => {
-          // Update current screen indicator
           const progress = self.progress
           const screenIndex = Math.round(progress * (sections.length - 1))
           setCurrentScreen(screenIndex)
@@ -113,7 +111,6 @@ function LiveShowPage() {
   }
 
   const handleFlashDealBuy = () => {
-    // Simple purchase confirmation
     alert(`Added ${flashDealProduct?.name} to cart!`)
     setFlashDealProduct(null)
   }
@@ -121,8 +118,8 @@ function LiveShowPage() {
   return (
     <div className="relative overflow-hidden">
       {/* Header with logo and screen indicators */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-screen-2xl mx-auto px-6 py-3 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
@@ -171,20 +168,20 @@ function LiveShowPage() {
           {/* Desktop Experience Panel */}
           <section 
             ref={desktopRef}
-            className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pt-20"
+            className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
           >
-            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-4 pb-8">
-              {/* Section header */}
-              <div className="text-center py-6">
-                <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300 mb-2">
+            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 pt-20 pb-6">
+              {/* Section header - compact */}
+              <div className="text-center py-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300 mb-1">
                   Desktop Experience
                 </h2>
-                <p className="text-blue-200 text-lg">Immersive full-screen livestream with real-time community chat</p>
+                <p className="text-blue-200 text-sm">How customers watch on desktop</p>
               </div>
 
-              {/* Main content grid - Video and Chat side by side */}
-              <div className="flex-1 grid lg:grid-cols-[1fr_400px] gap-4 min-h-0">
-                {/* Video Player - Takes most of the space */}
+              {/* Main content - fits in viewport */}
+              <div className="flex-1 grid lg:grid-cols-[1fr_380px] gap-4 overflow-hidden">
+                {/* Video Player */}
                 <div className="bg-black rounded-2xl overflow-hidden shadow-2xl relative">
                   <VideoPlayer playbackId={muxPlaybackId} />
                   
@@ -198,8 +195,8 @@ function LiveShowPage() {
                   )}
                 </div>
 
-                {/* Chat Panel - Fixed width sidebar */}
-                <div className="flex-shrink-0">
+                {/* Chat Panel - scrollable within its container */}
+                <div className="flex-shrink-0 overflow-hidden">
                   <ChatPanel />
                 </div>
               </div>
@@ -209,23 +206,25 @@ function LiveShowPage() {
           {/* Mobile Experience Panel */}
           <section 
             ref={mobileRef}
-            className="panel min-w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 pt-20"
+            className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900"
           >
-            <div className="w-full h-full flex flex-col max-w-screen-2xl mx-auto px-4">
-              {/* Section header */}
-              <div className="text-center py-6">
-                <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 mb-2">
+            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 pt-20 pb-6">
+              {/* Section header - compact */}
+              <div className="text-center py-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 mb-1">
                   Mobile Experience
                 </h2>
-                <p className="text-pink-200 text-lg">Vertical video optimized for on-the-go shopping</p>
+                <p className="text-pink-200 text-sm">How customers watch on mobile</p>
               </div>
 
-              {/* Mobile stream component */}
-              <div className="flex-1 min-h-0">
-                <PortraitStream 
-                  playbackId={muxPlaybackId}
-                  products={DEMO_PRODUCTS}
-                />
+              {/* Mobile content - centered and contained */}
+              <div className="flex-1 flex items-center justify-center overflow-hidden">
+                <div className="w-full max-w-6xl h-full">
+                  <PortraitStream 
+                    playbackId={muxPlaybackId}
+                    products={DEMO_PRODUCTS}
+                  />
+                </div>
               </div>
             </div>
           </section>
@@ -263,7 +262,7 @@ function LiveShowPage() {
       </div>
 
       {/* Live viewers count indicator */}
-      <div className="fixed top-24 left-6 z-40 bg-red-600/90 backdrop-blur-md px-4 py-2 rounded-full border border-red-400/50 shadow-lg flex items-center gap-2">
+      <div className="fixed top-20 left-6 z-40 bg-red-600/90 backdrop-blur-md px-4 py-2 rounded-full border border-red-400/50 shadow-lg flex items-center gap-2">
         <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
         <span className="text-white text-sm font-semibold">12.5K watching</span>
       </div>
