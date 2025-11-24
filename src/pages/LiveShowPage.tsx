@@ -1,19 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import VideoPlayer from '../components/VideoPlayer'
 import ChatPanel from '../components/ChatPanel'
-import ProductDrawer from '../components/ProductDrawer'
 import FlashDeal from '../components/FlashDeal'
 import PortraitStream from '../components/PortraitStream'
-import GroupBuyingFeature from '../components/GroupBuyingFeature'
-import Navbar from '../components/Navbar'
-import MissionSection from '../components/sections/MissionSection'
-import ValuesSection from '../components/sections/ValuesSection'
-import TechnologySection from '../components/sections/TechnologySection'
-import ImpactSection from '../components/sections/ImpactSection'
 import { Product } from '../types'
 
-// Same product list as ProductDrawer for flash deals
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger)
+
+// Demo products for flash deals only
 const DEMO_PRODUCTS: Product[] = [
   {
     id: '1',
@@ -42,28 +39,58 @@ const DEMO_PRODUCTS: Product[] = [
 ]
 
 function LiveShowPage() {
-  // Get Mux playback ID from environment variable
   const muxPlaybackId = import.meta.env.VITE_MUX_PLAYBACK_ID || 'placeholder-playback-id'
   
   const [flashDealProduct, setFlashDealProduct] = useState<Product | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [currentScreen, setCurrentScreen] = useState(0)
   
-  const missionRef = useRef<HTMLDivElement>(null)
-  const valuesRef = useRef<HTMLDivElement>(null)
-  const desktopSectionRef = useRef<HTMLDivElement>(null)
-  const mobileSectionRef = useRef<HTMLDivElement>(null)
-  const groupBuyingSectionRef = useRef<HTMLDivElement>(null)
-  const technologyRef = useRef<HTMLDivElement>(null)
-  const impactRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const desktopRef = useRef<HTMLDivElement>(null)
+  const mobileRef = useRef<HTMLDivElement>(null)
 
-  // Show random flash deals every 15 seconds
+  // Initialize horizontal scroll with GSAP
   useEffect(() => {
-    // Show first flash deal after 3 seconds
+    const container = containerRef.current
+    if (!container) return
+
+    // Calculate total scroll width
+    const sections = gsap.utils.toArray<HTMLElement>('.panel')
+    
+    // Create horizontal scroll animation
+    const scrollTween = gsap.to(sections, {
+      xPercent: -100 * (sections.length - 1),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: container,
+        pin: true,
+        scrub: 1,
+        snap: {
+          snapTo: 1 / (sections.length - 1),
+          duration: 0.5,
+          ease: 'power2.inOut',
+        },
+        end: () => `+=${container.offsetWidth * (sections.length - 1)}`,
+        onUpdate: (self) => {
+          // Update current screen indicator
+          const progress = self.progress
+          const screenIndex = Math.round(progress * (sections.length - 1))
+          setCurrentScreen(screenIndex)
+        },
+      },
+    })
+
+    return () => {
+      scrollTween.scrollTrigger?.kill()
+      scrollTween.kill()
+    }
+  }, [])
+
+  // Flash deals timer - only on desktop view
+  useEffect(() => {
     const initialTimer = setTimeout(() => {
       showRandomFlashDeal()
     }, 3000)
 
-    // Then show a new flash deal every 15 seconds
     const interval = setInterval(() => {
       showRandomFlashDeal()
     }, 15000)
@@ -75,8 +102,7 @@ function LiveShowPage() {
   }, [])
 
   const showRandomFlashDeal = () => {
-    // Only show if no flash deal is currently visible
-    if (!flashDealProduct) {
+    if (!flashDealProduct && currentScreen === 0) {
       const randomProduct = DEMO_PRODUCTS[Math.floor(Math.random() * DEMO_PRODUCTS.length)]
       setFlashDealProduct(randomProduct)
     }
@@ -87,228 +113,187 @@ function LiveShowPage() {
   }
 
   const handleFlashDealBuy = () => {
-    // Open the purchase modal for this product
-    setSelectedProduct(flashDealProduct)
+    // Simple purchase confirmation
+    alert(`Added ${flashDealProduct?.name} to cart!`)
     setFlashDealProduct(null)
   }
 
-  // Smooth scroll to section
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Navbar */}
-      <Navbar />
+    <div className="relative overflow-hidden">
+      {/* Header with logo and screen indicators */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl">S</span>
+            </div>
+            <span className="text-white font-semibold text-lg">Sook Live</span>
+          </div>
 
-      {/* Scroll Navigation Pills */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2">
-        <NavPill 
-          emoji="🌟"
-          label="Hero"
-          onClick={() => scrollToSection(missionRef)}
-          color="bg-purple-600/80"
+          {/* Screen indicators */}
+          <div className="flex items-center gap-2">
+            <ScreenIndicator 
+              active={currentScreen === 0} 
+              label="Desktop"
+              icon="🖥️"
+            />
+            <ScreenIndicator 
+              active={currentScreen === 1} 
+              label="Mobile"
+              icon="📱"
+            />
+          </div>
+
+          {/* Scroll hint */}
+          <div className="hidden md:flex items-center gap-2 text-purple-300 text-sm">
+            <span>Scroll to explore</span>
+            <svg 
+              className="w-5 h-5 animate-pulse" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M14 5l7 7m0 0l-7 7m7-7H3" 
+              />
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      {/* Horizontal scroll container */}
+      <div ref={containerRef} className="h-screen overflow-hidden">
+        <div className="flex h-screen">
+          {/* Desktop Experience Panel */}
+          <section 
+            ref={desktopRef}
+            className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pt-20"
+          >
+            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-4 pb-8">
+              {/* Section header */}
+              <div className="text-center py-6">
+                <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300 mb-2">
+                  Desktop Experience
+                </h2>
+                <p className="text-blue-200 text-lg">Immersive full-screen livestream with real-time community chat</p>
+              </div>
+
+              {/* Main content grid - Video and Chat side by side */}
+              <div className="flex-1 grid lg:grid-cols-[1fr_400px] gap-4 min-h-0">
+                {/* Video Player - Takes most of the space */}
+                <div className="bg-black rounded-2xl overflow-hidden shadow-2xl relative">
+                  <VideoPlayer playbackId={muxPlaybackId} />
+                  
+                  {/* Flash Deal Overlay */}
+                  {flashDealProduct && currentScreen === 0 && (
+                    <FlashDeal
+                      product={flashDealProduct}
+                      onClose={handleFlashDealClose}
+                      onBuyClick={handleFlashDealBuy}
+                    />
+                  )}
+                </div>
+
+                {/* Chat Panel - Fixed width sidebar */}
+                <div className="flex-shrink-0">
+                  <ChatPanel />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Mobile Experience Panel */}
+          <section 
+            ref={mobileRef}
+            className="panel min-w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 pt-20"
+          >
+            <div className="w-full h-full flex flex-col max-w-screen-2xl mx-auto px-4">
+              {/* Section header */}
+              <div className="text-center py-6">
+                <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 mb-2">
+                  Mobile Experience
+                </h2>
+                <p className="text-pink-200 text-lg">Vertical video optimized for on-the-go shopping</p>
+              </div>
+
+              {/* Mobile stream component */}
+              <div className="flex-1 min-h-0">
+                <PortraitStream 
+                  playbackId={muxPlaybackId}
+                  products={DEMO_PRODUCTS}
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Bottom scroll progress indicator */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-2xl">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            currentScreen === 0 
+              ? 'bg-blue-400 w-8' 
+              : 'bg-white/30 hover:bg-white/50'
+          }`}
+          aria-label="Go to desktop view"
         />
-        <NavPill 
-          emoji="💎"
-          label="Values"
-          onClick={() => scrollToSection(valuesRef)}
-          color="bg-indigo-600/80"
-        />
-        <NavPill 
-          emoji="🖥️"
-          label="Desktop"
-          onClick={() => scrollToSection(desktopSectionRef)}
-          color="bg-blue-600/80"
-        />
-        <NavPill 
-          emoji="📱"
-          label="Mobile"
-          onClick={() => scrollToSection(mobileSectionRef)}
-          color="bg-pink-600/80"
-        />
-        <NavPill 
-          emoji="🤝"
-          label="Group Buy"
-          onClick={() => scrollToSection(groupBuyingSectionRef)}
-          color="bg-yellow-600/80"
-        />
-        <NavPill 
-          emoji="🚀"
-          label="Technology"
-          onClick={() => scrollToSection(technologyRef)}
-          color="bg-cyan-600/80"
-        />
-        <NavPill 
-          emoji="💝"
-          label="Impact"
-          onClick={() => scrollToSection(impactRef)}
-          color="bg-green-600/80"
+        <button
+          onClick={() => {
+            const container = containerRef.current
+            if (container) {
+              window.scrollTo({ 
+                top: container.offsetHeight, 
+                behavior: 'smooth' 
+              })
+            }
+          }}
+          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            currentScreen === 1 
+              ? 'bg-pink-400 w-8' 
+              : 'bg-white/30 hover:bg-white/50'
+          }`}
+          aria-label="Go to mobile view"
         />
       </div>
 
-      {/* Hero Section */}
-      <section ref={missionRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 snap-start">
-        <MissionSection />
-      </section>
-
-      {/* Values Section */}
-      <section ref={valuesRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 snap-start">
-        <ValuesSection />
-      </section>
-
-      {/* Desktop Experience Section */}
-      <section ref={desktopSectionRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pt-16 snap-start">
-        <div className="h-full flex flex-col">
-          {/* Section Header */}
-          <div className="text-center py-8 px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-2">
-              Desktop Experience
-            </h2>
-            <p className="text-purple-300">Full-screen livestream with chat and products</p>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 lg:gap-4 lg:px-4 max-w-screen-2xl mx-auto w-full">
-        
-        {/* Video Player Section - Takes 2 columns on desktop */}
-        <div className="lg:col-span-2 bg-black rounded-lg overflow-hidden shadow-2xl relative">
-          <VideoPlayer playbackId={muxPlaybackId} />
-          
-          {/* Flash Deal Overlay */}
-          {flashDealProduct && (
-            <FlashDeal
-              product={flashDealProduct}
-              onClose={handleFlashDealClose}
-              onBuyClick={handleFlashDealBuy}
-            />
-          )}
-        </div>
-
-        {/* Chat Panel - Takes 1 column on desktop, below video on mobile */}
-        <div className="lg:col-span-1 flex-shrink-0 h-96 lg:h-auto">
-          <ChatPanel />
-        </div>
-
-            {/* Product Drawer - Full width at bottom on desktop, middle on mobile */}
-            <div className="lg:col-span-3 order-first lg:order-last mt-4">
-              <ProductDrawer 
-                selectedProduct={selectedProduct}
-                onCloseModal={() => setSelectedProduct(null)}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mobile Experience Section */}
-      <section ref={mobileSectionRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 py-16 snap-start">
-        <PortraitStream 
-          playbackId={muxPlaybackId}
-          products={DEMO_PRODUCTS}
-        />
-      </section>
-
-      {/* Group Buying Section */}
-      <section ref={groupBuyingSectionRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 py-16 snap-start">
-        <GroupBuyingFeature />
-      </section>
-
-      {/* Technology Section */}
-      <section ref={technologyRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-900 py-16 snap-start">
-        <TechnologySection />
-      </section>
-
-      {/* Impact Section */}
-      <section ref={impactRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 py-16 snap-start">
-        <ImpactSection />
-      </section>
-
-      {/* Final CTA Section */}
-      <section className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 py-16 snap-start flex items-center justify-center relative overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-yellow-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
-        </div>
-
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 mb-8">
-            Join the Journey
-          </h2>
-          <p className="text-2xl text-purple-100 mb-12 max-w-2xl mx-auto leading-relaxed">
-            We're building the future of video commerce, one joyful connection at a time
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <a
-              href="https://sook-pitch-deck--al9b220.gamma.site/deck"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-4 rounded-full text-lg transition-all duration-200 shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105"
-            >
-              View Full Pitch Deck
-            </a>
-            <button
-              onClick={() => scrollToSection(missionRef)}
-              className="bg-slate-800/80 backdrop-blur-sm hover:bg-slate-700/80 text-white font-bold px-8 py-4 rounded-full text-lg transition-all duration-200 border border-purple-500/30"
-            >
-              ↑ Back to Top
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            <Stat label="Live Shopping" value="$680B" subtext="US Market by 2030" />
-            <Stat label="Growth" value="32%" subtext="CAGR Globally" />
-            <Stat label="Cities" value="15+" subtext="US Connected" />
-            <Stat label="Vision" value="∞" subtext="Limitless Impact" />
-          </div>
-        </div>
-      </section>
+      {/* Live viewers count indicator */}
+      <div className="fixed top-24 left-6 z-40 bg-red-600/90 backdrop-blur-md px-4 py-2 rounded-full border border-red-400/50 shadow-lg flex items-center gap-2">
+        <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+        <span className="text-white text-sm font-semibold">12.5K watching</span>
+      </div>
     </div>
   )
 }
 
-interface NavPillProps {
-  emoji: string
+interface ScreenIndicatorProps {
+  active: boolean
   label: string
-  onClick: () => void
-  color: string
+  icon: string
 }
 
-function NavPill({ emoji, label, onClick, color }: NavPillProps) {
+function ScreenIndicator({ active, label, icon }: ScreenIndicatorProps) {
   return (
-    <button
-      onClick={onClick}
-      className={`group flex items-center gap-2 bg-slate-800/80 backdrop-blur-sm hover:${color} text-white rounded-full p-2.5 transition-all duration-300 shadow-lg hover:scale-110`}
-      title={label}
+    <div 
+      className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
+        active 
+          ? 'bg-purple-500/20 border border-purple-400/50' 
+          : 'bg-white/5 border border-white/10'
+      }`}
     >
-      <span className="text-lg">{emoji}</span>
-      <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 text-xs font-semibold whitespace-nowrap pr-0 group-hover:pr-2">
+      <span className="text-lg">{icon}</span>
+      <span className={`text-sm font-medium hidden sm:block ${
+        active ? 'text-purple-200' : 'text-gray-400'
+      }`}>
         {label}
       </span>
-    </button>
-  )
-}
-
-interface StatProps {
-  label: string
-  value: string
-  subtext: string
-}
-
-function Stat({ label, value, subtext }: StatProps) {
-  return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-purple-500/20">
-      <div className="text-purple-300 text-xs mb-1">{label}</div>
-      <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-1">
-        {value}
-      </div>
-      <div className="text-purple-400 text-xs">{subtext}</div>
     </div>
   )
 }
 
 export default LiveShowPage
-
