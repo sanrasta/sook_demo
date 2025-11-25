@@ -81,23 +81,23 @@ function PortraitStream({ playbackId, products }: PortraitStreamProps) {
   }, [showModal])
 
   return (
-    <div ref={containerRef} className="w-full py-8">
+    <div ref={containerRef} className="w-full">
       <div className="max-w-7xl mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-3">
+        <div className="text-center mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-2">
             Mobile Portrait Experience
           </h2>
-          <p className="text-purple-300 text-lg">
+          <p className="text-purple-300 text-sm">
             See how viewers shop on their phones - vertical video optimized for mobile
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
+        <div className="flex flex-col lg:flex-row gap-6 items-center justify-center">
           {/* Mobile Frame */}
           <div className="relative">
             {/* Phone mockup */}
-            <div className="relative w-[280px] md:w-[320px] h-[560px] md:h-[640px] bg-slate-900 rounded-[40px] p-3 shadow-2xl border-4 border-slate-800">
+            <div className="relative w-[260px] md:w-[300px] h-[520px] md:h-[600px] bg-slate-900 rounded-[40px] p-3 shadow-2xl border-4 border-slate-800">
               {/* Notch */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl z-20"></div>
               
@@ -258,8 +258,8 @@ function PortraitStream({ playbackId, products }: PortraitStreamProps) {
 
           {/* Feature List */}
           <div className="flex-1 max-w-md">
-            <h3 className="text-2xl font-bold text-white mb-6">Mobile-First Features</h3>
-            <div className="space-y-4">
+            <h3 className="text-xl font-bold text-white mb-4">Mobile-First Features</h3>
+            <div className="space-y-3">
               <FeatureItem 
                 icon="📱"
                 title="Vertical Video"

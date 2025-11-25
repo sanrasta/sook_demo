@@ -153,12 +153,12 @@ function LiveShowPage() {
           {/* Mobile Experience Panel */}
           <section 
             ref={mobileRef}
-            className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900"
+            className="panel min-w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 overflow-hidden"
           >
-            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 py-6">
-              {/* Mobile content - centered and contained */}
-              <div className="flex-1 flex items-center justify-center overflow-hidden">
-                <div className="w-full max-w-6xl h-full">
+            <div className="w-full max-w-screen-2xl mx-auto px-6 h-full flex items-center justify-center">
+              {/* Scale container to fit viewport */}
+              <div className="w-full max-w-7xl" style={{ maxHeight: '90vh' }}>
+                <div className="flex items-center justify-center h-full scale-90">
                   <PortraitStream 
                     playbackId={muxPlaybackId}
                     products={DEMO_PRODUCTS}
