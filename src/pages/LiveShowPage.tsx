@@ -117,51 +117,6 @@ function LiveShowPage() {
 
   return (
     <div className="relative overflow-hidden">
-      {/* Header with logo and screen indicators */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-screen-2xl mx-auto px-6 py-3 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
-            </div>
-            <span className="text-white font-semibold text-lg">Sook Live</span>
-          </div>
-
-          {/* Screen indicators */}
-          <div className="flex items-center gap-2">
-            <ScreenIndicator 
-              active={currentScreen === 0} 
-              label="Desktop"
-              icon="🖥️"
-            />
-            <ScreenIndicator 
-              active={currentScreen === 1} 
-              label="Mobile"
-              icon="📱"
-            />
-          </div>
-
-          {/* Scroll hint */}
-          <div className="hidden md:flex items-center gap-2 text-purple-300 text-sm">
-            <span>Scroll to explore</span>
-            <svg 
-              className="w-5 h-5 animate-pulse" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M14 5l7 7m0 0l-7 7m7-7H3" 
-              />
-            </svg>
-          </div>
-        </div>
-      </header>
-
       {/* Horizontal scroll container */}
       <div ref={containerRef} className="h-screen overflow-hidden">
         <div className="flex h-screen">
@@ -170,15 +125,7 @@ function LiveShowPage() {
             ref={desktopRef}
             className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
           >
-            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 pt-20 pb-6">
-              {/* Section header - compact */}
-              <div className="text-center py-4">
-                <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300 mb-1">
-                  Desktop Experience
-                </h2>
-                <p className="text-blue-200 text-sm">How customers watch on desktop</p>
-              </div>
-
+            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 py-6">
               {/* Main content - fits in viewport */}
               <div className="flex-1 grid lg:grid-cols-[1fr_380px] gap-4 overflow-hidden">
                 {/* Video Player */}
@@ -208,15 +155,7 @@ function LiveShowPage() {
             ref={mobileRef}
             className="panel min-w-full h-screen flex flex-col bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900"
           >
-            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 pt-20 pb-6">
-              {/* Section header - compact */}
-              <div className="text-center py-4">
-                <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300 mb-1">
-                  Mobile Experience
-                </h2>
-                <p className="text-pink-200 text-sm">How customers watch on mobile</p>
-              </div>
-
+            <div className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 py-6">
               {/* Mobile content - centered and contained */}
               <div className="flex-1 flex items-center justify-center overflow-hidden">
                 <div className="w-full max-w-6xl h-full">
@@ -231,7 +170,7 @@ function LiveShowPage() {
         </div>
       </div>
 
-      {/* Bottom scroll progress indicator */}
+      {/* Bottom scroll progress indicator - minimal */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-2xl">
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -260,37 +199,6 @@ function LiveShowPage() {
           aria-label="Go to mobile view"
         />
       </div>
-
-      {/* Live viewers count indicator */}
-      <div className="fixed top-20 left-6 z-40 bg-red-600/90 backdrop-blur-md px-4 py-2 rounded-full border border-red-400/50 shadow-lg flex items-center gap-2">
-        <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-        <span className="text-white text-sm font-semibold">12.5K watching</span>
-      </div>
-    </div>
-  )
-}
-
-interface ScreenIndicatorProps {
-  active: boolean
-  label: string
-  icon: string
-}
-
-function ScreenIndicator({ active, label, icon }: ScreenIndicatorProps) {
-  return (
-    <div 
-      className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
-        active 
-          ? 'bg-purple-500/20 border border-purple-400/50' 
-          : 'bg-white/5 border border-white/10'
-      }`}
-    >
-      <span className="text-lg">{icon}</span>
-      <span className={`text-sm font-medium hidden sm:block ${
-        active ? 'text-purple-200' : 'text-gray-400'
-      }`}>
-        {label}
-      </span>
     </div>
   )
 }
