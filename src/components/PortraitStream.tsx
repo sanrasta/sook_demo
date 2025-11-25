@@ -81,19 +81,19 @@ function PortraitStream({ playbackId, products }: PortraitStreamProps) {
   }, [showModal])
 
   return (
-    <div ref={containerRef} className="w-full">
-      <div className="max-w-7xl mx-auto px-4">
+    <div ref={containerRef} className="w-full h-full flex items-center">
+      <div className="w-full max-w-7xl mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-2">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-pink-200 mb-2">
             Mobile Portrait Experience
           </h2>
           <p className="text-purple-300 text-sm">
-            See how viewers shop on their phones - vertical video optimized for mobile
+            Vertical video optimized for mobile shopping
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-center justify-center">
+        <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
           {/* Mobile Frame */}
           <div className="relative">
             {/* Phone mockup */}
@@ -257,7 +257,7 @@ function PortraitStream({ playbackId, products }: PortraitStreamProps) {
           </div>
 
           {/* Feature List */}
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 max-w-md lg:max-w-sm">
             <h3 className="text-xl font-bold text-white mb-4">Mobile-First Features</h3>
             <div className="space-y-3">
               <FeatureItem 

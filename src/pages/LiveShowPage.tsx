@@ -5,6 +5,7 @@ import VideoPlayer from '../components/VideoPlayer'
 import ChatPanel from '../components/ChatPanel'
 import FlashDeal from '../components/FlashDeal'
 import PortraitStream from '../components/PortraitStream'
+import GroupBuyPhone from '../components/GroupBuyPhone'
 import { Product } from '../types'
 
 // Register GSAP plugins
@@ -47,6 +48,7 @@ function LiveShowPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const desktopRef = useRef<HTMLDivElement>(null)
   const mobileRef = useRef<HTMLDivElement>(null)
+  const groupBuyRef = useRef<HTMLDivElement>(null)
 
   // Initialize horizontal scroll with GSAP - snappier feel
   useEffect(() => {
@@ -156,13 +158,26 @@ function LiveShowPage() {
             className="panel min-w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 overflow-hidden"
           >
             <div className="w-full max-w-screen-2xl mx-auto px-6 h-full flex items-center justify-center">
-              {/* Scale container to fit viewport */}
               <div className="w-full max-w-7xl" style={{ maxHeight: '90vh' }}>
                 <div className="flex items-center justify-center h-full scale-90">
                   <PortraitStream 
                     playbackId={muxPlaybackId}
                     products={DEMO_PRODUCTS}
                   />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Group Buying Panel */}
+          <section 
+            ref={groupBuyRef}
+            className="panel min-w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 overflow-hidden"
+          >
+            <div className="w-full max-w-screen-2xl mx-auto px-6 h-full flex items-center justify-center">
+              <div className="w-full max-w-7xl" style={{ maxHeight: '90vh' }}>
+                <div className="flex items-center justify-center h-full scale-90">
+                  <GroupBuyPhone />
                 </div>
               </div>
             </div>
@@ -197,6 +212,23 @@ function LiveShowPage() {
               : 'bg-white/30 hover:bg-white/50'
           }`}
           aria-label="Go to mobile view"
+        />
+        <button
+          onClick={() => {
+            const container = containerRef.current
+            if (container) {
+              window.scrollTo({ 
+                top: container.offsetHeight * 2, 
+                behavior: 'smooth' 
+              })
+            }
+          }}
+          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            currentScreen === 2 
+              ? 'bg-yellow-400 w-8' 
+              : 'bg-white/30 hover:bg-white/50'
+          }`}
+          aria-label="Go to group buy view"
         />
       </div>
     </div>
