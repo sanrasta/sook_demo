@@ -1,0 +1,17 @@
+{
+    "name": "sook-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:web\"",
+        "dev:api": "cd apps/api && npm run start:dev",
+        "dev:web": "cd apps/web && npm run dev",
+        "clean:ports": "npx kill-port 3000 3001",
+        "prestart": "npm run clean:ports",
+        "start": "node scripts/start.js"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "kill-port": "^2.0.1"
+    }
+}
